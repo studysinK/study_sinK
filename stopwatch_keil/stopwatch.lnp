@@ -1,0 +1,6 @@
+"STARTUP.obj",
+"main.obj",
+"1602driver.obj",
+"LED.obj" 
+TO "stopwatch" 
+RAMSIZE(256) 

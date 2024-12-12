@@ -1,0 +1,335 @@
+C51 COMPILER V9.00   MAIN                                                                  12/10/2024 16:37:16 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE main.c BROWSE DEBUG OBJECTEXTEND TABS(6)
+
+line level    source
+
+   1          #include "1602driver.h"
+   2          #include "LED.h"
+   3          
+   4          uchar page;//0=menu 1=Timer 2=Count_Down
+   5          uchar state;//0=空闲 1=正计时中 2=倒计时中
+   6          uchar code keyboard_dictionaries[ ]={'l','1','4','7','d','o','u','0','2','5','8','r','3','6','9','b'};//键
+             -盘顺序 123789 10 12 13 14
+   7          uchar key[16];//键盘不按下的为X
+   8          uchar Zero[]="                ";
+   9          uchar menu1[]="1/Timer";//菜单第一行
+  10          uchar menu2[]="2/Down";//菜单第二行
+  11          uchar Timer[]="Timing";//正计时页面
+  12          uchar Count_Down[]="Enter";//倒计时页面
+  13          
+  14          
+  15          uchar time[4];
+  16          uchar time_hidden;
+  17          uchar over;//0 =不需要翻页 1需要翻页
+  18          uchar over1;//解决跳转时无法跳转
+  19          uint text1;
+  20          uint text2;
+  21          
+  22          
+  23          void keyboard_scanning();//扫描键盘
+  24          
+  25          
+  26          sbit CLK = P3^7;
+  27          sbit PL = P3^6;
+  28          sbit KEY = P3^5;
+  29          
+  30          void main()
+  31          {
+  32   1          uchar itim;
+  33   1          uint text;
+  34   1      
+  35   1          TMOD=0x01;
+  36   1          TH0 = 60536/256;
+  37   1          TL0 = 60536%256;
+  38   1          TH1=55536/256;
+  39   1          TL1=55536%256;
+  40   1          EA=1;
+  41   1          ET0=1;
+  42   1          TR0=1;
+  43   1          EA = 1; // 开总中断
+  44   1          EX1 = 1; // 开外中断1
+  45   1          PX1 = 1; // 外中断1设成高级别中断
+  46   1          IT1 = 1; // 外中断1设成边沿触发
+  47   1          EX0 = 1;
+  48   1          IT0 = 1;
+  49   1          ET1=1;
+  50   1          TR1=1;
+  51   1          PT1=1;
+  52   1            lcdrw = 0;
+  53   1            init();
+  54   1            PL=1;
+C51 COMPILER V9.00   MAIN                                                                  12/10/2024 16:37:16 PAGE 2   
+
+  55   1            CLK=0;
+  56   1            over=0;
+  57   1            page=0;
+  58   1            state=0;
+  59   1            time_hidden=0;
+  60   1            delay(5);
+  61   1      
+  62   1      
+  63   1            printf_data1x(menu1);
+  64   1            printf_data2x(menu2);
+  65   1      
+  66   1      
+  67   1            while(1)
+  68   1            {
+  69   2            switch (page)
+  70   2            {
+  71   3             case 0://---------------- 
+  72   3             {
+  73   4             EA=0;
+  74   4              if(key[1]=='1')
+  75   4              {
+  76   5              page=1;
+  77   5              over=1;
+  78   5      
+  79   5              } 
+  80   4              if(key[8]=='2')
+  81   4              {
+  82   5              page=2;
+  83   5              over=1;
+  84   5      
+  85   5              }
+  86   4                if(over1==0)
+  87   4                {
+  88   5                printf_data1x(menu1);
+  89   5                printf_data2x(menu2);
+  90   5                over1=1;
+  91   5                over=0;
+  92   5                page=0;
+  93   5                }
+  94   4             EA=1;
+  95   4             }
+  96   3             break;
+  97   3      
+  98   3      
+  99   3             case 1 ://------------------
+ 100   3             {
+ 101   4             EA=0;
+ 102   4              if(over==1)
+ 103   4              { 
+ 104   5              printf_data1x(Timer);
+ 105   5              printf_data2x(Zero);
+ 106   5              over=0;
+ 107   5              page=1;
+ 108   5              }
+ 109   4              if(key[5]!='X')
+ 110   4              {
+ 111   5              state=1;
+ 112   5              text1=0;
+ 113   5              time[0]=0;
+ 114   5             time[1]=0;
+ 115   5             time[2]=0;
+ 116   5             time[3]=0;
+C51 COMPILER V9.00   MAIN                                                                  12/10/2024 16:37:16 PAGE 3   
+
+ 117   5              }
+ 118   4      
+ 119   4             EA=1;       
+ 120   4             }
+ 121   3             break;
+ 122   3             
+ 123   3                  
+ 124   3             case 2 ://--------------
+ 125   3             { 
+ 126   4              
+ 127   4              if(over==1)
+ 128   4              { 
+ 129   5              EA=0;
+ 130   5              printf_data1x(Count_Down);
+ 131   5              printf_data2x(Zero);
+ 132   5              over=0;
+ 133   5              page=2;
+ 134   5              EA=1;
+ 135   5              }
+ 136   4              
+ 137   4      
+ 138   4      
+ 139   4              for(itim=0;itim<16;itim++)
+ 140   4              {
+ 141   5              if(key[itim]!='X')
+ 142   5              {
+ 143   6              time[1]=key[itim];
+ 144   6              }
+ 145   5              }
+ 146   4      
+ 147   4              if(key[5]!='X')
+ 148   4              {
+ 149   5              EA=0;
+ 150   5              state=2;
+ 151   5             // text=(time[2]-3)*100;                                                                                                   
+             -                                                          
+ 152   5              text1=0;
+ 153   5              
+ 154   5             EA=1; 
+ 155   5              }
+ 156   4              switch(time[1])
+ 157   4        {
+ 158   5            case'0': text2=0;
+ 159   5         break;
+ 160   5            case'1': text2=100;
+ 161   5         break;
+ 162   5            case'2': text2=200;
+ 163   5         break;
+ 164   5            case'3': text2=300;                     
+ 165   5         break;  
+ 166   5            case'4': text2=400;
+ 167   5         break;
+ 168   5            case'5': text2=500;
+ 169   5         break;
+ 170   5            case'6': text2=600;
+ 171   5         break;          
+ 172   5            case'7': text2=700;
+ 173   5         break;
+ 174   5            case'8': text2=800;
+ 175   5         break;
+ 176   5            case'9': text2=900;
+ 177   5         break;
+C51 COMPILER V9.00   MAIN                                                                  12/10/2024 16:37:16 PAGE 4   
+
+ 178   5            default:
+ 179   5         break;     
+ 180   5        }
+ 181   4      
+ 182   4              
+ 183   4                   
+ 184   4             }
+ 185   3             break;     
+ 186   3         default:
+ 187   3         break;
+ 188   3      
+ 189   3            }
+ 190   2            text=text1;
+ 191   2            if(state==1)
+ 192   2            {
+ 193   3             for(itim=0;itim<4;itim++)
+ 194   3             {
+ 195   4             time[3-itim]=text%10;
+ 196   4             text=text/10;
+ 197   4             }
+ 198   3             LED_printf(time);
+ 199   3            }
+ 200   2      
+ 201   2            if(state==2)
+ 202   2            {
+ 203   3            text=text2-text1;
+ 204   3             for(itim=0;itim<4;itim++)
+ 205   3             {
+ 206   4             time[3-itim]=text%10;
+ 207   4             text=text/10;
+ 208   4             }
+ 209   3             LED_printf(time);
+ 210   3      
+ 211   3      //     if(text==0)
+ 212   3      
+ 213   3            }
+ 214   2      
+ 215   2      
+ 216   2             
+ 217   2      
+ 218   2      
+ 219   2            }///
+ 220   1      }
+ 221          
+ 222          
+ 223          void counter0() interrupt 1 //计时器中断服务函数
+ 224          {
+ 225   1          LED_printf(time);
+ 226   1          keyboard_scanning();
+ 227   1        
+ 228   1          
+ 229   1          LED_printf(time);
+ 230   1           TH0 = 5536/256;
+ 231   1          TL0 = 5536%256;
+ 232   1      }
+ 233          
+ 234          void counter1() interrupt 3
+ 235          {
+ 236   1           time_hidden++;  
+ 237   1        if(time_hidden==17)
+ 238   1          {
+ 239   2          time_hidden=0;
+C51 COMPILER V9.00   MAIN                                                                  12/10/2024 16:37:16 PAGE 5   
+
+ 240   2          text1 = text1+1;
+ 241   2          if(text1==9999)
+ 242   2          {text1=0;}
+ 243   2          }          
+ 244   1          TH1=15536/256;
+ 245   1          TL1=15536%256;
+ 246   1      }
+ 247          void int0() interrupt 0 
+ 248          {
+ 249   1         state=0;
+ 250   1         time_hidden=0;
+ 251   1         text1=0;
+ 252   1         text2=0;
+ 253   1      
+ 254   1      }
+ 255          
+ 256          void int1() interrupt 2 
+ 257          {
+ 258   1         page=0;
+ 259   1         over1=0;
+ 260   1         time[0]=0;
+ 261   1         time[1]=0;
+ 262   1         time[2]=0;
+ 263   1         time[3]=0;
+ 264   1      }
+ 265          
+ 266          
+ 267          
+ 268          
+ 269          
+ 270          
+ 271          void keyboard_scanning()
+ 272          {
+ 273   1        uchar i;
+ 274   1         PL=0;
+ 275   1       delay(1);  
+ 276   1         PL=1;
+ 277   1        for(i=0;i<16;i++)
+ 278   1       {
+ 279   2        key[i]=KEY;
+ 280   2        CLK=0;
+ 281   2       delay(1);   
+ 282   2        CLK=1;
+ 283   2       }
+ 284   1       for(i=0;i<16;i++)
+ 285   1       {
+ 286   2        if(key[i]==1)
+ 287   2        {
+ 288   3        key[i]=keyboard_dictionaries[i];
+ 289   3        }
+ 290   2        if(key[i]==0)
+ 291   2        {
+ 292   3        key[i]='X';
+ 293   3        }
+ 294   2       }
+ 295   1      
+ 296   1      }
+ 297          
+ 298            
+ 299          
+ 300           
+
+C51 COMPILER V9.00   MAIN                                                                  12/10/2024 16:37:16 PAGE 6   
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    813    ----
+   CONSTANT SIZE    =     16    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     74       4
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

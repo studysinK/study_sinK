@@ -1,0 +1,42 @@
+C51 COMPILER V9.00   KEYBOARD                                                              12/07/2024 21:54:17 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE KEYBOARD
+OBJECT MODULE PLACED IN keyboard.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE keyboard.c BROWSE DEBUG OBJECTEXTEND TABS(6)
+
+line level    source
+
+   1          #include "keyboard.h"
+   2          
+   3          //void keyboard_scanning()
+   4          //{
+   5          //  uchar key[16];
+   6          //  uchar i;
+   7          //   PL=0;
+   8          // for(i=0;i<5;i++); 
+   9          //   PL=1;
+  10          // for(i=0;i<16;i++)
+  11          // {
+  12          //  CLK=0;
+  13          // for(i=0;i<1;i++);   
+  14          //  CLK=1;
+  15          //  key[i]=KEY;
+  16          //
+  17          // }
+  18          //
+  19          //}
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   ----    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
